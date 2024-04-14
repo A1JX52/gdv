@@ -12,6 +12,9 @@ public:
 	Vector3();
 	Vector3(double x, double y, double z);
 	POINT toPoint();
+	Vector3 operator * (const double& scalar);
+	double* getCoordinates();
+	Vector3 operator + (const Vector3& vec);
 	friend class Matrix3;
 };
 
@@ -21,5 +24,6 @@ public:
 	Matrix3();
 	void setTrans(double x, double y, double z);
 	void setRotate(double deg, int opt);
+	void setPersp(double dist);
 	Vector3 operator * (const Vector3& vec);
 };

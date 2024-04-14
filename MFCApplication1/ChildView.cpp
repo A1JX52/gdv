@@ -7,6 +7,7 @@
 #include "ChildView.h"
 #include "Vector2.h"
 #include "Vector3.h"
+#include <algorithm>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -33,6 +34,7 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_COMMAND(ID_COMPUTERGRAFIK_MANDELARRAY, &CChildView::OnComputergrafikMandelarray)
 	ON_COMMAND(ID_VEKTOREN_WUERFEL, &CChildView::OnVektorenWuerfel)
 	ON_COMMAND(ID_VEKTOREN_DEBUG, &CChildView::OnVektorenDebug)
+	ON_COMMAND(ID_VEKTOREN_WUERFELPERSP, &CChildView::OnVektorenWuerfelpersp)
 END_MESSAGE_MAP()
 
 
@@ -642,4 +644,110 @@ void CChildView::OnVektorenDebug()
 	CString txt;
 	txt.Format(_T("hello world!"));
 	GetParent()->SetWindowTextW(txt);
+}
+
+void CChildView::OnVektorenWuerfelpersp()
+{
+	currentMode = 0;
+
+	Vector3 cpyCube[8];
+	cpyCube[0] = Vector3(50, 50, 0);
+	cpyCube[1] = Vector3(100, 50, 0);
+	cpyCube[2] = Vector3(100, 100, 0);
+	cpyCube[3] = Vector3(50, 100, 0);
+
+	cpyCube[4] = Vector3(50, 50, 50);
+	cpyCube[5] = Vector3(100, 50, 50);
+	cpyCube[6] = Vector3(100, 100, 50);
+	cpyCube[7] = Vector3(50, 100, 50);
+
+	CDC* pDc = GetDC();
+
+	CRect rect;
+	GetClientRect(&rect);
+	int width = rect.Width();
+	int height = rect.Height();
+
+	m_DC.DeleteDC();
+	m_DC.CreateCompatibleDC(pDc);
+	CBitmap bm;
+	bm.CreateCompatibleBitmap(pDc, width, height);
+	m_DC.SelectObject(&bm);
+
+	CPen myPen(PS_SOLID, 2, RGB(255, 0, 0));
+	m_DC.SelectObject(&myPen);
+
+	Matrix3 matT, matTInv, rotY, rotX, rotZ, matP;
+	Vector3 center = (cpyCube[0] + cpyCube[6]) * 0.5;
+	double* cord = center.getCoordinates();
+
+	matT.setTrans(-cord[0], -cord[1], -cord[2]);
+	matTInv.setTrans(cord[0], cord[1], cord[2]);
+
+	//perspektivische Betrachtung lässt würfel ohne rotation sichtbar werden
+	//legt entfernung der kamera fest
+	//je größer, desto weiter weg
+	matP.setPersp(100);
+
+	Vector3 cube[8];
+
+	for (int anim = 0; anim < 160; anim++) {
+		std::copy(std::begin(cpyCube), std::end(cpyCube), std::begin(cube));
+
+		m_DC.FillSolidRect(rect, RGB(255, 255, 255));
+
+		for (int i = 0; i < 8; i++) {
+			cube[i] = matT * cube[i];
+			if (1) {
+				//nicht kommutativ, bei perspektivischer Bertrachtung irrelevant, kommt durch die parallelbetrachtung
+				rotX.setRotate(anim * 0.1, 0);
+				cube[i] = rotX * cube[i];
+			}
+
+			if (1) {
+				rotY.setRotate(anim * 0.1, 1);
+				cube[i] = rotY * cube[i];
+			}
+
+			if (1) {
+				rotZ.setRotate(anim * 0.1, 1);
+				cube[i] = rotZ * cube[i];
+			}
+			//perspektivische betrachtung anwenden
+			cube[i] = matP * cube[i];
+			//homogene Koordiante ermitteln; homogene Koordinate zurückrechnen, damit Translation wieder funktioniert
+			double scal = 1 / cube[i].getCoordinates()[3];
+			cube[i] = cube[i] * scal;
+
+			cube[i] = matTInv * cube[i];
+		}
+
+		//Quadrat hinten malen
+		m_DC.MoveTo(cube[3].toPoint());
+
+		for (int i = 0; i < 4; i++) {
+			m_DC.LineTo(cube[i].toPoint());
+		}
+
+		//Quadrat vorne malen
+		m_DC.MoveTo(cube[7].toPoint());
+
+		for (int i = 4; i < 8; i++) {
+			m_DC.LineTo(cube[i].toPoint());
+		}
+
+		//Senkrechten malen
+		for (int i = 0; i < 4; i++) {
+			m_DC.MoveTo(cube[i].toPoint());
+			m_DC.LineTo(cube[i + 4].toPoint());
+		}
+		pDc->BitBlt(0, 0, width, height, &m_DC, 0, 0, SRCCOPY);
+		Sleep(70);
+
+		if (GetAsyncKeyState(VK_ESCAPE) & 0x01) {
+			return;
+		}
+	}
+	bm.DeleteObject();
+	ReleaseDC(pDc);
 }

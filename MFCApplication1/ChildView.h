@@ -45,4 +45,5 @@ public:
 	afx_msg void OnComputergrafikMandelarray();
 	afx_msg void OnVektorenWuerfel();
 	afx_msg void OnVektorenDebug();
+	afx_msg void OnVektorenWuerfelpersp();
 };
