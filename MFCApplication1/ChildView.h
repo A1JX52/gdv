@@ -15,6 +15,8 @@ public:
 	double deltaY;
 	int currentMode;
 	CDC m_DC;
+	int m_height;
+	int m_width;
 
 // Vorgänge
 public:
@@ -22,6 +24,9 @@ public:
 	void Mandelbrot();
 	void MandelbrotBitBlt();
 	void MandelArray();
+	void GLInit(int Breite, int Hoehe, int Modus);
+	void Bunter_Einheitswuerfel();
+	void Achsenkreuz(float l);
 
 // Überschreibungen
 	protected:
@@ -46,4 +51,5 @@ public:
 	afx_msg void OnVektorenWuerfel();
 	afx_msg void OnVektorenDebug();
 	afx_msg void OnVektorenWuerfelpersp();
+	afx_msg void OnOpenglErster();
 };
