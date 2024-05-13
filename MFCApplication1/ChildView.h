@@ -27,6 +27,8 @@ public:
 	void GLInit(int Breite, int Hoehe, int Modus);
 	void Bunter_Einheitswuerfel();
 	void Achsenkreuz(float l);
+	void drawCube();
+	void myMaterial(float r, float g, float b, int s);
 
 // Überschreibungen
 	protected:
@@ -52,4 +54,5 @@ public:
 	afx_msg void OnVektorenDebug();
 	afx_msg void OnVektorenWuerfelpersp();
 	afx_msg void OnOpenglErster();
+	afx_msg void OnOpenglGlu1();
 };

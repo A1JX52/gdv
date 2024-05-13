@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_COMMAND(ID_VEKTOREN_DEBUG, &CChildView::OnVektorenDebug)
 	ON_COMMAND(ID_VEKTOREN_WUERFELPERSP, &CChildView::OnVektorenWuerfelpersp)
 	ON_COMMAND(ID_OPENGL_ERSTER, &CChildView::OnOpenglErster)
+	ON_COMMAND(ID_OPENGL_GLU1, &CChildView::OnOpenglGlu1)
 END_MESSAGE_MAP()
 
 
@@ -964,4 +965,135 @@ void CChildView::OnOpenglErster()
 		Sleep(100);
 	}
 	GLInit(0, 0, 0);
+}
+void CChildView::OnOpenglGlu1()
+{
+	GLInit(1200, 1200, 1);
+	glClearColor(0.5, 0.5, 0.5, 1);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glFrustum(-1, 1, -1, 1, 1.5, 6);
+	gluLookAt(1.0, 1.0, 3.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	glEnable(GL_DEPTH_TEST);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	
+	float params[4] = { 1.0, 1.5, 2.0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, params);
+
+	//equal intensities of colors for neutral light
+	float params2[4] = { 1, 1, 1, 1 };
+	glLightfv(GL_LIGHT1, GL_POSITION, params2);
+
+	//float params3[4] = { 1, 0, 0, 1 };
+	//ambient is extending position
+	//glLightfv(GL_LIGHT1, GL_AMBIENT, params3);
+
+	myMaterial(248, 187, 208, 50);
+	GLUquadricObj* scoop = gluNewQuadric();
+	//will be added to modelview matrix until reset
+	glTranslated(0, .1, 0);
+	gluQuadricDrawStyle(scoop, GLU_FILL);
+	gluSphere(scoop, 0.5, 20, 10);
+	glLoadIdentity();
+
+	myMaterial(255, 187, 51, 50);
+	GLUquadricObj* fillCone = gluNewQuadric();
+	//color will be ignored if we make use of light (material is needed)
+	glColor3f(1, 0, 0);
+	gluQuadricDrawStyle(fillCone, GLU_FILL);
+	glRotated(90, 1, 0, 0);
+	gluCylinder(fillCone, 0.5, 0, 2.5, 40, 20);
+
+	myMaterial(102, 51, 0, 50);
+	GLUquadricObj* gridCone = gluNewQuadric();
+	gluQuadricDrawStyle(gridCone, GLU_LINE);
+	gluCylinder(gridCone, 0.5, 0, 2.5, 40, 20);
+
+	glTranslated(0, 0, 1);
+	drawCube();
+
+	//colors won't be ignored anymore
+	glDisable(GL_LIGHTING);
+	glColor3f(0.5, 0.5, 0.5);
+
+	glTranslated(-1.25, 0.1, -0.1);
+	GLUquadricObj* hole = gluNewQuadric();
+	gluQuadricDrawStyle(hole, GLU_FILL);
+	gluDisk(hole, 0, 0.25, 40, 1);
+	glLoadIdentity();
+
+	glRotated(90, 1, 0, 0);
+	glTranslated(1.25, 0.1, 0.9);
+	GLUquadricObj* hole2 = gluNewQuadric();
+	gluQuadricDrawStyle(hole2, GLU_FILL);
+	gluDisk(hole2, 0, 0.25, 40, 1);
+	glLoadIdentity();
+
+	SwapBuffers(wglGetCurrentDC());
+	GLInit(0, 0, 0);
+}
+
+void CChildView::drawCube() {
+	glBegin(GL_QUADS);
+	glNormal3f(0, 0, -1);
+	glVertex3f(-2.25, -0.5, -0.05);
+	glVertex3f(-2.25, 0.5, -0.05);
+	glVertex3f(2.25, 0.5, -0.05);
+	glVertex3f(2.25, -0.5, -0.05);
+
+	glNormal3f(0, 0, 1);
+	glVertex3f(-2.25, -0.5, 0.05);
+	glVertex3f(2.25, -0.5, 0.05);
+	glVertex3f(2.25, 0.5, 0.05);
+	glVertex3f(-2.25, 0.5, 0.05);
+
+	glNormal3f(0, -1, 0);
+	glVertex3f(-2.25, -0.5, -0.05);
+	glVertex3f(2.25, -0.5, -0.05);
+	glVertex3f(2.25, -0.5, 0.05);
+	glVertex3f(-2.25, -0.5, 0.05);
+
+	glNormal3f(0, 1, 0);
+	glVertex3f(-2.25, 0.5, -0.05);
+	glVertex3f(-2.25, 0.5, 0.05);
+	glVertex3f(2.25, 0.5, 0.05);
+	glVertex3f(2.25, 0.5, -0.05);
+
+	glNormal3f(-1, 0, 0);
+	glVertex3f(-2.25, -0.5, -0.05);
+	glVertex3f(-2.25, -0.5, 0.05);
+	glVertex3f(-2.25, 0.5, 0.05);
+	glVertex3f(-2.25, 0.5, -0.05);
+
+	glNormal3f(1, 0, 0);
+	glVertex3f(2.25, -0.5, -0.05);
+	glVertex3f(2.25, 0.5, -0.05);
+	glVertex3f(2.25, 0.5, 0.05);
+	glVertex3f(2.25, -0.5, 0.05);
+	glEnd();
+}
+
+void CChildView::myMaterial(float r, float g, float b, int s) {
+	r /= 255;
+	g /= 255;
+	b /= 255;
+
+	GLfloat  GAmbient[4] = {r, g, b, 1.0};
+	GLfloat  GDiffuse[4] = {r, g, b, 1.0};
+	GLfloat  GSpecular[4] = {r, g, b, 1.0};
+	GLfloat  GShininess = s;
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, GAmbient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GDiffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, GSpecular);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, GShininess);
 }
