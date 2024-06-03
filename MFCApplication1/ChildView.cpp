@@ -39,6 +39,8 @@ BEGIN_MESSAGE_MAP(CChildView, CWnd)
 	ON_COMMAND(ID_VEKTOREN_WUERFELPERSP, &CChildView::OnVektorenWuerfelpersp)
 	ON_COMMAND(ID_OPENGL_ERSTER, &CChildView::OnOpenglErster)
 	ON_COMMAND(ID_OPENGL_GLU1, &CChildView::OnOpenglGlu1)
+	ON_COMMAND(ID_OPENGL_KUGEL, &CChildView::OnOpenglKugel)
+	ON_COMMAND(ID_OPENGL_KUGEL32783, &CChildView::OnOpenglKugel32783)
 END_MESSAGE_MAP()
 
 
@@ -1096,4 +1098,152 @@ void CChildView::myMaterial(float r, float g, float b, int s) {
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GDiffuse);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, GSpecular);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, GShininess);
+}
+#define MAX_ANZAHL_TEILCHEN 20000
+
+void CChildView::OnOpenglKugel()
+{
+	GLInit(1200, 1200, 1);
+	glClearColor(0.5, 0.5, 0.5, 1);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glFrustum(-1, 1, -1, 1, 1.5, 6);
+	gluLookAt(1.0, 1.0, 3.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_NORMALIZE);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	//equal intensities of colors for neutral light
+	float params[4] = { 1, 1, 1, 1 };
+	glLightfv(GL_LIGHT0, GL_POSITION, params);
+
+	GLfloat  GAmbient[4] = { 0.25f, 0.20f, 0.07f, 1.0 };
+	GLfloat  GDiffuse[4] = { 0.75f, 0.61f, 0.23f, 1.0 };
+	GLfloat  GSpecular[4] = { 0.63f, 0.56f, 0.37f, 1.0 };
+	GLfloat  GShininess = 51;
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, GAmbient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GDiffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, GSpecular);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, GShininess);
+
+	GLdouble* arr = new GLdouble[MAX_ANZAHL_TEILCHEN * 3];
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	for (int anz = 0; anz < MAX_ANZAHL_TEILCHEN; anz++) {
+			arr[anz * 3] = rand();
+			arr[anz * 3 + 1] = rand();
+			arr[anz * 3 + 2] = rand();
+	}
+
+	for (int i = 0; i < 200; i++) {
+		long t1 = clock();
+
+		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		for (int anz = 0; anz < MAX_ANZAHL_TEILCHEN; anz++) {
+			arr[anz * 3] += 0.3;
+
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+
+			glRotated(arr[anz * 3], 0, 0, 1);
+			glRotated(arr[anz * 3 + 1], 1, 0, 0);
+			glRotated(arr[anz * 3 + 2], 0, 1, 0);
+			glTranslatef(0, 0, 1);
+			glRotated(30, 1, 0, 0);
+			glScaled(0.1, 0.1, 0.1);
+
+			glBegin(GL_TRIANGLES);
+			glVertex3d(-0.3, -0.3, 0);
+			glVertex3d(-0.3, 0.3, 0);
+			glVertex3d(0.3, -0.3, 0);
+			glEnd();
+		}
+		SwapBuffers(wglGetCurrentDC());
+
+		float time = (float)(clock() - t1) / CLOCKS_PER_SEC;
+		CString txt;
+		txt.Format(_T("frames: %7.4f"), 1. / time);
+		GetParent()->SetWindowTextW(txt);
+	}
+	GLInit(0, 0, 0);
+}
+
+void CChildView::OnOpenglKugel32783()
+{
+	GLInit(1200, 1200, 1);
+	glClearColor(0.5, 0.5, 0.5, 1);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glFrustum(-1, 1, -1, 1, 1.5, 6);
+	gluLookAt(1.0, 1.0, 3.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_NORMALIZE);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	//equal intensities of colors for neutral light
+	float params[4] = { 1, 1, 1, 1 };
+	glLightfv(GL_LIGHT0, GL_POSITION, params);
+
+	GLfloat  GAmbient[4] = { 0.25f, 0.20f, 0.07f, 1.0 };
+	GLfloat  GDiffuse[4] = { 0.75f, 0.61f, 0.23f, 1.0 };
+	GLfloat  GSpecular[4] = { 0.63f, 0.56f, 0.37f, 1.0 };
+	GLfloat  GShininess = 51;
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, GAmbient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, GDiffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, GSpecular);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, GShininess);
+
+	for (int anz = 100; anz < MAX_ANZAHL_TEILCHEN; anz += 100) {
+		long t1 = clock();
+
+		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		for (int i = 0; i < anz; i++) {
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+
+			glRotated(rand(), 0, 0, 1);
+			glRotated(rand(), 1, 0, 0);
+			glRotated(rand(), 0, 1, 0);
+			glTranslatef(0, 0, 1);
+			glRotated(30, 1, 0, 0);
+			glScaled(0.1, 0.1, 0.1);
+
+			glBegin(GL_TRIANGLES);
+			glVertex3d(-0.3, -0.3, 0);
+			glVertex3d(-0.3, 0.3, 0);
+			glVertex3d(0.3, -0.3, 0);
+			glEnd();
+		}
+		SwapBuffers(wglGetCurrentDC());
+
+		float time = (float)(clock() - t1) / CLOCKS_PER_SEC;
+		CString txt;
+		txt.Format(_T("frames: %7.4f"), 1. / time);
+		GetParent()->SetWindowTextW(txt);
+	}
+	GLInit(0, 0, 0);
 }

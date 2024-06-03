@@ -55,4 +55,6 @@ public:
 	afx_msg void OnVektorenWuerfelpersp();
 	afx_msg void OnOpenglErster();
 	afx_msg void OnOpenglGlu1();
+	afx_msg void OnOpenglKugel();
+	afx_msg void OnOpenglKugel32783();
 };
